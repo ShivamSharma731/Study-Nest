@@ -37,11 +37,11 @@ const SignUp = () => {
     const data = await response.json();
     // localStorage.setItem("user", JSON.stringify(data.token));
     console.log(data);
-    
-    dispatch({ type: "SIGNUP", payload: data });        // update auth
+
+    dispatch({ type: "SIGNUP", payload: data }); // update auth
 
     if (data.status === 200) {
-      navigate("/home");
+      navigate("/dashboard");
     }
   };
 

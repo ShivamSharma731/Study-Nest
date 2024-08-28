@@ -20,7 +20,7 @@ const Login = () => {
 
   useEffect(() => {
     if (authenticated) {
-      navigate("/home");
+      navigate("/dashboard");
     }
   }, [authenticated, navigate]);
 
@@ -41,7 +41,7 @@ const Login = () => {
     console.log(data);
     if (data.status === 200) {
       e.preventDefault();
-      navigate("/home");
+      navigate("/dashboard");
     }
   };
 
@@ -54,7 +54,7 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email }), 
+          body: JSON.stringify({ email }),
         }
       );
 

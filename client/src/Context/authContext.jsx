@@ -1,4 +1,5 @@
 import { createContext, useEffect, useReducer, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
@@ -31,6 +32,7 @@ export const AuthContextProvider = ({ children }) => {
         if (response.ok) {
           const data = await response.json();
           setAuthenticated(true);
+          <Navigate to={"/login"} />;
           dispatch({ type: "SIGNUP", payload: data.user });
         } else {
           setAuthenticated(false);
