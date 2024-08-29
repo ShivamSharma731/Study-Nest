@@ -25,7 +25,9 @@
 [x] : make a sidebar
 [x] : sidebar animations
 [x] : sidebar features routes and components
+[] : add sign up with google feature
 [] : notifications feature on channels
 [] : on channel's icon display number of unread messages
 [] : make channels list container
 [] : make channels content container
+[x] : feature of closing sidebar by clicking outside of sidebar

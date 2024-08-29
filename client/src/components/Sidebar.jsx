@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { MdOutlineDashboard } from "react-icons/md";
@@ -16,6 +16,7 @@ const Sidebar = () => {
   const location = useLocation();
   const { dispatch } = useAuthContext();
   const navigate = useNavigate();
+  const sidebarRef = useRef(null);
 
   const handleLogout = async () => {
     try {
@@ -30,6 +31,23 @@ const Sidebar = () => {
     }
   };
 
+  const handleClickOutside = (event) => {
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setSidebarOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sidebarOpen]);
+
   const menus = [
     { name: "Dashboard", link: "/dashboard", icon: MdOutlineDashboard },
     { name: "Solo Study", link: "/solo-study", icon: IoBookSharp },
@@ -42,7 +60,8 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`bg-gray-800 min-h-screen text-purple-700 px-3 ${
+      ref={sidebarRef}
+      className={`bg-gray-900 min-h-screen text-purple-700 px-3 ${
         sidebarOpen ? "w-64" : "w-16"
       } duration-500 flex flex-col`}
     >
@@ -75,7 +94,6 @@ const Sidebar = () => {
                 {menu.name}
               </div>
             )}
-            {/* on hover on icon shows name of icon */}
             {!sidebarOpen && (
               <span
                 className="absolute left-14 bg-gray-300 font-semibold text-gray-900 rounded-md drop-shadow-lg px-2 py-0.5 text-xs w-fit overflow-hidden group-hover:block hidden group-hover:left-14"
@@ -90,7 +108,7 @@ const Sidebar = () => {
       <div className="mt-auto py-3 px-0 pb-6">
         <button
           onClick={handleLogout}
-          className={`flex items-center gap-2  pr-36 pl-2 pt-2 pb-2 rounded-md hover:bg-gray-800 group `}
+          className={`flex items-center gap-2 pr-36 pl-2 pt-2 pb-2 rounded-md hover:bg-gray-800 group`}
         >
           <IoLogOut size={26} className="text-purple-500" />
           {sidebarOpen && (
