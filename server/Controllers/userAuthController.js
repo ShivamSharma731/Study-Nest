@@ -49,7 +49,6 @@ const signUpUser = async (req, res) => {
       secure: true,
       sameSite: "None",
     });
- 
 
     res.status(200).json({
       message: "User created successfully",
@@ -106,4 +105,9 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-module.exports = { loginUser, signUpUser, logoutUser, forgotPassword };
+module.exports = {
+  loginUser,
+  signUpUser,
+  logoutUser,
+  forgotPassword,
+};

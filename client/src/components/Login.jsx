@@ -79,9 +79,9 @@ const Login = () => {
         <span key={index}></span>
       ))}
 
-      <div className="signin">
+      <div className="signin rounded-xl">
         <div className="content">
-          <h2>Login</h2>
+          <h2 className="font-bold">LOGIN</h2>
           <div className="form">
             <div className="inputBox">
               <input

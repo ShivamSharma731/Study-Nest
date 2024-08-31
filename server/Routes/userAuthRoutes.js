@@ -4,6 +4,7 @@ const {
   signUpUser,
   logoutUser,
   forgotPassword,
+  getUserId,
 } = require("../Controllers/userAuthController");
 const tokenVerify = require("../Middlewares/tokenVerify");
 const router = express.Router();
@@ -15,9 +16,7 @@ router.post("/login", loginUser);
 router.post("/signup", signUpUser);
 
 // verify token
-router.get("/verify-token", tokenVerify, (req, res) => {
-  res.json({ isValid: true, userId: req._id });
-});
+router.get("/verify-token", tokenVerify, (req, res) => {});
 
 // logout route
 router.post("/logout", logoutUser);

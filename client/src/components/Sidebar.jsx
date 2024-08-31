@@ -97,7 +97,10 @@ const Sidebar = () => {
             {!sidebarOpen && (
               <span
                 className="absolute left-14 bg-gray-300 font-semibold text-gray-900 rounded-md drop-shadow-lg px-2 py-0.5 text-xs w-fit overflow-hidden group-hover:block hidden group-hover:left-14"
-                style={{ whiteSpace: "nowrap" }}
+                style={{
+                  whiteSpace: "nowrap",
+                  zIndex: 50, 
+                }}
               >
                 {menu.name}
               </span>

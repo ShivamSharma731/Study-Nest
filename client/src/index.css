@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+.custom-scrollbar {
+  @apply overflow-y-auto;
+  position: relative; /* Ensure the element is positioned */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px; /* Width of the scrollbar */
+}
+.custom-scrollbar {
+  @apply overflow-y-auto;
+  max-height: 600px; /* Ensure there's enough height for the scrollbar to show */
+  position: relative;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #2a3241; /* Track color */
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888; /* Handle color */
+  border-radius: 8px; /* Rounded corners */
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.2s ease; /* Smooth transition */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Handle color on hover */
+}
+
 /* :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
