@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const Channel = require("./Models/ChannelModel.js");
+const nodemailer = require("nodemailer");
 
 const app = express();
 const server = http.createServer(app);
@@ -27,6 +28,8 @@ app.use(
 
 const userAuthRoutes = require("./Routes/userAuthRoutes");
 const { tokenVerify } = require("./Middlewares/tokenVerify");
+const Users = require("./Models/UsersModel.js");
+const OtpModel = require("./Models/OtpModel.jsx");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -35,8 +38,31 @@ app.get("/", (req, res) => {
   res.send("Server Running...");
 });
 
+app.get("/searchChannels", async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const channels = await Channel.find({
+      name: { $regex: query, $options: "i" },
+    });
+    res.json(channels);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to search channels" });
+  }
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await Users.find({}, "username");
+    res.json(users);
+  } catch (er) {
+    console.error("Error fetching user list:", er);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 app.get("/api/user/userId", async (req, res) => {
-  const token = req.cookies.jwt;
+  const token = req.cookies.jwt; // Assuming the JWT is stored in cookies
 
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
@@ -48,9 +74,52 @@ app.get("/api/user/userId", async (req, res) => {
       "secretkeyforthisjwtiamwritingnotinenvfuckhackers"
     );
     const userId = decoded._id;
-    res.status(200).json({ userId });
+    const user = await Users.findById(userId);
+
+    // Return the username
+    res.status(200).json({ userId, username: user.username });
   } catch (err) {
     res.status(403).json({ message: "Invalid token" });
+  }
+});
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "shivamsharma72004@gmail.com",
+    pass: "ShivamSharma@1970",
+  },
+});
+
+const generateOtp = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+};
+
+app.post("/api/user/send-otp", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  // generate nodemailer and otp and send a mail to this.mail
+  const otp = generateOtp();
+  console.log(otp);
+
+  const mailOptions = {
+    from: "shivamsharma72004@gmail.com",
+    to: email,
+    subject: "Your OTP Code",
+    text: `Your OTP code is ${otp}. It is valid for 10 minutes.`,
+  };
+
+  // send the otp
+  try {
+    await transporter.sendMail(mailOptions);
+    await OtpModel.create({ email, otp });
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (err) {
+    console.log("Error sending otp : ", err);
   }
 });
 
@@ -104,28 +173,31 @@ io.on("connection", async (socket) => {
   });
 
   // Handle sending a message
-  socket.on("sendMessage", async ({ channelId, content, senderId }) => {
-    // Create a new message object
-    const newMessage = {
-      content,
-      timestamp: new Date(),
-      sender: senderId,
-    };
+  socket.on(
+    "sendMessage",
+    async ({ channelId, content, senderId, username }) => {
+      // Create a new message object including the username
+      const newMessage = {
+        content,
+        timestamp: new Date(),
+        sender: senderId,
+        username: username, // Add the username to the message object
+      };
 
-    try {
-      // Save the message to the database
-      await Channel.findByIdAndUpdate(
-        channelId,
-        { $push: { messages: newMessage } },
-        { new: true }
-      );
-
-      // Optionally emit the new message to the channel so all users can see it
-      io.to(channelId).emit("newMessage", newMessage);
-    } catch (err) {
-      console.log(err);
+      try {
+        // Save the message to the database
+        await Channel.findByIdAndUpdate(
+          channelId,
+          { $push: { messages: newMessage } },
+          { new: true }
+        );
+        // Emit the new message to the channel so all users can see it
+        io.to(channelId).emit("newMessage", newMessage);
+      } catch (err) {
+        console.log(err);
+      }
     }
-  });
+  );
 
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);

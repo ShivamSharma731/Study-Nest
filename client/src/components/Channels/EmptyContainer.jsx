@@ -13,7 +13,7 @@ const EmptyContainer = () => {
   };
 
   return (
-    <div className="flex-1 bg-gray-800 p-0 rounded-lg shadow-md flex flex-col items-center justify-center  border-gray-700 ">
+    <div className="flex-1 bg-gray-950 p-0 rounded-lg shadow-md flex flex-col items-center justify-center border-4  border-gray-800 ">
       {/* Animation and Content */}
       <div className="flex flex-col items-center">
         {/* Animation */}

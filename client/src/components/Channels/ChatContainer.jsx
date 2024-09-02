@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IoSend } from "react-icons/io5";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import io from "socket.io-client";
@@ -11,6 +11,14 @@ const ChatContainer = ({ channel, onBackButtonClick }) => {
   const [message, setMessage] = useState("");
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
+  const messageEndRef = useRef(null);
+
+  // scroll the messages to the end
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "auto" });
+    }
+  }, [messages, channel]);
 
   useEffect(() => {
     const getUserIdAndUsername = async () => {
@@ -65,11 +73,10 @@ const ChatContainer = ({ channel, onBackButtonClick }) => {
       const newMessage = {
         channelId: channel._id,
         content: message,
-        senderId: userId, // Include the userId when sending the message
-        // username: user.username, // Assuming you fetch and store the username
+        senderId: userId,
+        username: username,
       };
 
-      // Emit the new message to the server
       socket.emit("sendMessage", newMessage);
 
       setMessage("");
@@ -114,9 +121,15 @@ const ChatContainer = ({ channel, onBackButtonClick }) => {
                 : "bg-gray-700 text-left mr-auto self-start"
             }`}
           >
-            {msg.content}
+            {msg.sender !== userId && (
+              <div className="font-semibold mb-1 text-purple-500">
+                @ {msg.username}
+              </div>
+            )}
+            <div>{msg.content}</div>
           </div>
         ))}
+        <div ref={messageEndRef} />
       </div>
 
       {/* Message Input */}

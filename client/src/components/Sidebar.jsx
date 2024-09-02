@@ -10,6 +10,7 @@ import { FaRobot } from "react-icons/fa6";
 import { FaRegNewspaper } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 import { useAuthContext } from "../hooks/useAuthContext";
+import logoUrl from "./studyLogo.png";
 
 const Sidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -65,13 +66,21 @@ const Sidebar = () => {
         sidebarOpen ? "w-64" : "w-16"
       } duration-500 flex flex-col`}
     >
-      <div className="py-3 flex justify-end">
+      <div className="flex items-start justify-between py-3 mb-6">
+        {sidebarOpen && (
+          <img
+            src={logoUrl}
+            alt="StudyNest Logo"
+            className="w-36 mt-4 h-auto"
+          />
+        )}
         <HiMenuAlt3
           size={26}
-          className="cursor-pointer"
+          className="cursor-pointer ml-2 mt-4"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         />
       </div>
+
       <div className="flex flex-col gap-5 mt-16 flex-grow relative text-xl">
         {menus.map((menu, i) => (
           <Link
@@ -99,7 +108,7 @@ const Sidebar = () => {
                 className="absolute left-14 bg-gray-300 font-semibold text-gray-900 rounded-md drop-shadow-lg px-2 py-0.5 text-xs w-fit overflow-hidden group-hover:block hidden group-hover:left-14"
                 style={{
                   whiteSpace: "nowrap",
-                  zIndex: 50, 
+                  zIndex: 50,
                 }}
               >
                 {menu.name}
@@ -111,7 +120,7 @@ const Sidebar = () => {
       <div className="mt-auto py-3 px-0 pb-6">
         <button
           onClick={handleLogout}
-          className={`flex items-center gap-2 pr-36 pl-2 pt-2 pb-2 rounded-md hover:bg-gray-800 group`}
+          className={`flex items-center gap-2 pr-36 pl-2 pt-2 pb-2 rounded-md p-2 hover:bg-gray-800 group`}
         >
           <IoLogOut size={26} className="text-purple-500" />
           {sidebarOpen && (

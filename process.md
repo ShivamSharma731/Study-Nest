@@ -33,7 +33,7 @@
 [x] : feature of closing sidebar by clicking outside of sidebar
 [x] : connect socket
 [] : get the channels list and show it on the first container
-[] : create channel feature and add it to the mongo channel schema
+[x] : create channel feature and add it to the mongo channel schema
 [] : make a pop screen for creating channel name and send it to the server via socket
 [] : ask for display pic for channel
 [] : add logo to the sidebar
@@ -45,3 +45,6 @@
 [] : add send files feature
 [] : when channel opens it should be scrolled down automatically to the last messages
 [] : show user profile on the sidebar
+[] : create channel iterface design
+[] : dashboard basic design
+[] : 
