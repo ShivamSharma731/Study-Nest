@@ -143,18 +143,39 @@ app.post("/api/user/verify-otp", async (req, res) => {
   }
 
   try {
+    // Find OTP record
     const otpRecord = await Otp.findOne({ email, otp });
 
     if (!otpRecord) {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
-    // If OTP is valid, delete it (optional)
+    // Check if OTP has expired
+    const otpCreatedAt = otpRecord.createdAt;
+    const now = new Date();
+    const expiryTime = 10 * 60 * 1000; // 10 minutes
+    if (now - otpCreatedAt > expiryTime) {
+      return res.status(400).json({ error: "OTP has expired" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "3d" });
+
+    
+
+    // Send JWT token in a cookie
+    res.cookie("jwt", token, {
+      maxAge: 3 * 24 * 60 * 60 * 1000,
+      secure: true,
+      sameSite: "None",
+    });
+
+    // Optionally, delete the OTP record
     await Otp.deleteOne({ _id: otpRecord._id });
 
     res.status(200).json({ message: "OTP verified successfully" });
   } catch (error) {
-    console.log("Error verifying OTP:", error);
+    console.error("Error verifying OTP:", error);
     if (!res.headersSent) {
       res.status(500).json({ error: "Failed to verify OTP" });
     }
@@ -190,9 +211,7 @@ app.post("/api/user/forgot-password", async (req, res) => {
     // Store the OTP in the database
     await Otp.create({ email, otp });
 
-    return res
-      .status(200)
-      .json({ message: "OTP sent to your email" });
+    return res.status(200).json({ message: "OTP sent to your email" });
   } catch (error) {
     console.error("Error in forgot-password route:", error);
     res.status(500).json({ message: "Internal server error" });

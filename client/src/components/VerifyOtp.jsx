@@ -11,7 +11,7 @@ const VerifyOtp = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(10 * 60); 
   const navigate = useNavigate();
 
   useEffect(() => {

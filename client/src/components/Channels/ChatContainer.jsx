@@ -13,7 +13,6 @@ const ChatContainer = ({ channel, onBackButtonClick }) => {
   const [username, setUsername] = useState(null);
   const messageEndRef = useRef(null);
 
-  // scroll the messages to the end
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "auto" });
@@ -45,18 +44,11 @@ const ChatContainer = ({ channel, onBackButtonClick }) => {
 
   useEffect(() => {
     if (channel) {
-      // Join the channel's room
       socket.emit("joinChannel", channel._id);
-
-      // Fetch initial messages for the selected channel
       socket.emit("fetchMessages", channel._id);
-
-      // Listen for messages when initially joining
       socket.on("channelMessages", (fetchedMessages) => {
         setMessages(fetchedMessages);
       });
-
-      // Listen for new messages in real-time
       socket.on("newMessage", (newMessage) => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });

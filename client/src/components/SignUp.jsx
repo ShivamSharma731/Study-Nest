@@ -52,7 +52,7 @@ const SignUp = () => {
     setTimeout(() => {
       setLoading(false);
       if (data.status === 200) {
-        dispatch({ type: "SIGNUP", payload: data }); // Update auth
+        dispatch({ type: "SIGNUP", payload: data }); 
         toast.success("Account created successfully!!", {
           position: "bottom-right",
           autoClose: 5000,

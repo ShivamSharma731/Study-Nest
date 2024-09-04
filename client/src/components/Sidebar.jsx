@@ -52,7 +52,7 @@ const Sidebar = () => {
   const menus = [
     { name: "Dashboard", link: "/dashboard", icon: MdOutlineDashboard },
     { name: "Solo Study", link: "/solo-study", icon: IoBookSharp },
-    { name: "Channels", link: "/channels", icon: PiChatsBold },
+    { name: "Study Groups", link: "/channels", icon: PiChatsBold },
     { name: "Study Goals", link: "/study-goals", icon: GoGoal },
     { name: "Notes", link: "/notes", icon: CgNotes },
     { name: "Ask AI", link: "/ask-ai", icon: FaRobot },

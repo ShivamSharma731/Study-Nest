@@ -5,7 +5,7 @@ import Lottie from "react-lottie";
 import io from "socket.io-client";
 import { logo } from "../../assets/images.js";
 import { useLocation } from "react-router-dom";
-import messageAnimation from "./messageAnimation.json"; // Import your animation JSON file
+import messageAnimation from "./messageAnimation.json"; 
 import ChannelCreator from "./ChannelCreator.jsx";
 
 const socket = io("http://localhost:4545");
@@ -15,8 +15,8 @@ const Channels = () => {
   const [hasChats, setHasChats] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [showChatContainer, setShowChatContainer] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // State to store search query
-  const [showChannelCreator, setShowChannelCreator] = useState(false); // State to show/hide channel creator
+  const [searchQuery, setSearchQuery] = useState(""); 
+  const [showChannelCreator, setShowChannelCreator] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const Channels = () => {
       socket.emit("getChannels");
     };
 
-    fetchChannels(); // Fetch channels when the component mounts
+    fetchChannels(); 
 
     socket.on("channelList", (channels) => {
       setChannelList(channels);
@@ -48,7 +48,7 @@ const Channels = () => {
   };
 
   const handleCreateChannelClick = () => {
-    setShowChannelCreator(true); // Show the channel creator
+    setShowChannelCreator(true); 
   };
 
   const handleSelectChannel = (channel) => {
@@ -79,7 +79,7 @@ const Channels = () => {
   };
 
   const handleCloseChannelCreator = () => {
-    setShowChannelCreator(false); // Hide the channel creator
+    setShowChannelCreator(false); 
   };
 
   return (
@@ -117,7 +117,6 @@ const Channels = () => {
                       alt="Channel Logo"
                     />
                   </div>
-
                   <span className="font-semibold truncate">{channel.name}</span>
                 </button>
               ))}
