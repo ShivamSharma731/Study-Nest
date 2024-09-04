@@ -6,15 +6,17 @@ import { AuthContext } from "../Context/authContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import notebookUrl from "./notebook4.svg";
-import logoUrl from "./studyLogo.png"; 
+import logoUrl from "./studyLogo.png";
 import Lottie from "lottie-react";
-import loadingAnimation from "./loading.json"; 
+import loadingAnimation from "./loading.json";
+import mainPageLoading from "./loadingMainPage.json";
 
 const Login = () => {
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(false);
 
   const { authenticated } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -27,12 +29,16 @@ const Login = () => {
 
   const handleNavigate = (e) => {
     e.preventDefault();
-    navigate("/signup");
+    setShowAnimation(true);
+    setTimeout(() => {
+      navigate("/signup");
+      setShowAnimation(false);
+    }, 1000);
   };
 
   const handlesubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); 
+    setLoading(true);
 
     try {
       const response = await fetch("http://localhost:4545/api/user/login", {
@@ -49,7 +55,7 @@ const Login = () => {
       const data = await response.json();
 
       setTimeout(() => {
-        setLoading(false); 
+        setLoading(false);
 
         if (data.status === 200) {
           toast.success("Login successful!", {
@@ -83,9 +89,9 @@ const Login = () => {
             }
           );
         }
-      }, 4000); 
+      }, 4000);
     } catch (error) {
-      setLoading(false); 
+      setLoading(false);
       toast.error("An error occurred. Please try again later.");
     }
   };
@@ -127,11 +133,22 @@ const Login = () => {
           className="w-3/5 h-auto rounded-lg animate-float"
         />
       </div>
+      {showAnimation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <Lottie
+            animationData={mainPageLoading }
+            loop={true}
+            className="w-64 h-64"
+          />
+        </div>
+      )}
 
       {/* Login box */}
       <div className="absolute w-[400px] bg-gray-800 mr-10 z-20 flex justify-center items-center p-10 rounded-xl shadow-lg top-1/2 transform -translate-y-1/2 right-[15%]">
         <div className="flex flex-col items-center gap-6 w-full">
-          <h2 className="text-3xl text-purple-700 font-bold mb-4">Welcome Back</h2>
+          <h2 className="text-3xl text-purple-700 font-bold mb-4">
+            Welcome Back
+          </h2>
           <div className="flex flex-col gap-6 w-full">
             <div className="relative w-full">
               <input

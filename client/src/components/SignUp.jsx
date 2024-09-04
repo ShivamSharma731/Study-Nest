@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import notebookUrl from "./notebook.svg";
 import logoUrl from "./studyLogo.png";
 import loadingAnimation from "./loading.json";
+import loadingMainPageAnimation from "./loadingMainPage.json";
 import Lottie from "lottie-react";
 
 const SignUp = () => {
@@ -15,19 +16,23 @@ const SignUp = () => {
   const [password, setpassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showMessageAnimation, setShowMessageAnimation] = useState(false);
 
   const { dispatch } = useAuthContext();
   const navigate = useNavigate();
 
   const handleNavigate = (e) => {
     e.preventDefault();
-    navigate("/login");
+    setShowMessageAnimation(true);
+    setTimeout(() => {
+      setShowMessageAnimation(false);
+      navigate("/login");
+    }, 1000);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const response = await fetch("http://localhost:4545/api/user/signup", {
       method: "POST",
       credentials: "include",
@@ -100,6 +105,16 @@ const SignUp = () => {
         <img src={logoUrl} alt="StudyNest Logo" className="w-48 h-auto" />{" "}
         {/* Adjusted size */}
       </nav>
+
+      {showMessageAnimation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <Lottie
+            animationData={loadingMainPageAnimation}
+            loop={true}
+            className="w-64 h-64"
+          />
+        </div>
+      )}
 
       {/* Sign-up box */}
       <div className="absolute w-[400px] bg-gray-800 z-20 flex justify-center items-center p-10 rounded-xl shadow-lg top-1/2 transform -translate-y-1/2 left-[20%]">

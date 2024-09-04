@@ -6,6 +6,7 @@ import io from "socket.io-client";
 import { logo } from "../../assets/images.js";
 import { useLocation } from "react-router-dom";
 import messageAnimation from "./messageAnimation.json"; // Import your animation JSON file
+import ChannelCreator from "./ChannelCreator.jsx";
 
 const socket = io("http://localhost:4545");
 
@@ -15,28 +16,25 @@ const Channels = () => {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [showChatContainer, setShowChatContainer] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // State to store search query
+  const [showChannelCreator, setShowChannelCreator] = useState(false); // State to show/hide channel creator
   const location = useLocation();
 
   useEffect(() => {
-    // Emit the 'getChannels' event to fetch the channel list
     const fetchChannels = () => {
       socket.emit("getChannels");
     };
 
     fetchChannels(); // Fetch channels when the component mounts
 
-    // Listen for the channel list from the server
     socket.on("channelList", (channels) => {
       setChannelList(channels);
     });
 
-    // Cleanup to prevent memory leaks
     return () => {
       socket.off("channelList");
     };
-  }, [location.pathname]); // Re-run the effect whenever the route changes
+  }, [location.pathname]);
 
-  // Fetch channels matching the search query
   const searchChannels = async (query) => {
     try {
       const response = await fetch(
@@ -49,12 +47,10 @@ const Channels = () => {
     }
   };
 
-  const handleCreateChannel = () => {
-    const channelName = prompt("Enter the name for the new channel:");
-    if (channelName) socket.emit("createChannel", channelName);
+  const handleCreateChannelClick = () => {
+    setShowChannelCreator(true); // Show the channel creator
   };
 
-  // Handle selecting a channel
   const handleSelectChannel = (channel) => {
     setHasChats(true);
     setSelectedChannel(channel);
@@ -65,14 +61,12 @@ const Channels = () => {
     }, 800);
   };
 
-  // Handle going back to the channel list
   const handleBackButton = () => {
     setHasChats(false);
     setSelectedChannel(null);
     setShowChatContainer(false);
   };
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -80,22 +74,23 @@ const Channels = () => {
     if (query.trim()) {
       searchChannels(query);
     } else {
-      // If search query is empty, fetch all channels
       socket.emit("getChannels");
     }
+  };
+
+  const handleCloseChannelCreator = () => {
+    setShowChannelCreator(false); // Hide the channel creator
   };
 
   return (
     <div className="p-3 h-full mr-1">
       <div className="flex space-x-1 h-full">
-        {/* Channels List */}
         <div className="flex-none w-1/5 bg-gray-800 p-4 ml-0 rounded-lg shadow-lg flex flex-col justify-between">
           <div>
             <h2 className="text-xl font-semibold text-purple-400 mb-8 mt-4">
               Study Groups
             </h2>
 
-            {/* Search Bar */}
             <div className="mb-4">
               <input
                 type="text"
@@ -106,7 +101,6 @@ const Channels = () => {
               />
             </div>
 
-            {/* Channels list */}
             <div className="flex flex-col space-y-0 text-sm border-2 rounded-lg border-gray-900 custom-scrollbar h-128">
               {channelList.map((channel) => (
                 <button
@@ -116,7 +110,6 @@ const Channels = () => {
                     selectedChannel === channel ? "bg-gray-700" : "bg-gray-800"
                   } hover:bg-gray-700 shadow-md flex items-center space-x-4 transition duration-300 border-b-2 border-gray-900`}
                 >
-                  {/* Display Picture */}
                   <div className="w-10 h-10 rounded-full overflow-hidden">
                     <img
                       src={logo}
@@ -125,28 +118,24 @@ const Channels = () => {
                     />
                   </div>
 
-                  {/* Channel Name */}
                   <span className="font-semibold truncate">{channel.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Create Channel Button */}
           <div>
             <button
               className="w-full p-2 text-gray-200 bg-purple-800 rounded-md border border-purple-900 hover:bg-purple-700 transition-colors duration-200 font-bold"
-              onClick={handleCreateChannel}
+              onClick={handleCreateChannelClick}
             >
               Create Group
             </button>
           </div>
         </div>
 
-        {/* Channels Content */}
         {hasChats && !showChatContainer ? (
           <div className="flex-1 flex items-center justify-center bg-gray-900 rounded-lg">
-            {/* Lottie Animation */}
             <Lottie
               options={{
                 loop: true,
@@ -166,6 +155,11 @@ const Channels = () => {
           <EmptyContainer />
         )}
       </div>
+
+      {/* Conditionally render the ChannelCreator */}
+      {showChannelCreator && (
+        <ChannelCreator socket={socket} onClose={handleCloseChannelCreator} />
+      )}
     </div>
   );
 };
