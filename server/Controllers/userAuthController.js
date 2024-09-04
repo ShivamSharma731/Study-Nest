@@ -74,40 +74,39 @@ const logoutUser = (req, res) => {
 };
 
 // forgot password
-const forgotPassword = async (req, res) => {
-  const { email } = req.body;
-  try {
-    const user = await Users.findOne({ email });
-    if (!user) {
-      res.status(400).json({ error: "No user found from this email" });
-    }
-    const existingPassword = user.password;
+// const forgotPassword = async (req, res) => {
+//   const { email } = req.body;
+//   try {
+//     const user = await Users.findOne({ email });
+//     if (!user) {
+//       res.status(400).json({ error: "No user found from this email" });
+//     }
+//     const existingPassword = user.password;
 
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: "shivamsharma3172004@gmail.com",
-        pass: "ShivamSharma@1970",
-      },
-    });
+//     const transporter = nodemailer.createTransport({
+//       service: "Gmail",
+//       auth: {
+//         user: "shivamsharma3172004@gmail.com",
+//         pass: "ShivamSharma@1970",
+//       },
+//     });
 
-    const mailOptions = {
-      to: user.email,
-      from: "passwordreset@gmail.com",
-      subject: "Sending a person his password because of his lost memory...",
-      text: `Your current password is: ${existingPassword}\n\nPlease use it to log in.`,
-    };
+//     const mailOptions = {
+//       to: user.email,
+//       from: "passwordreset@gmail.com",
+//       subject: "Sending a person his password because of his lost memory...",
+//       text: `Your current password is: ${existingPassword}\n\nPlease use it to log in.`,
+//     };
 
-    await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: "Password sent to your mail" });
-  } catch (error) {
-    res.status(500).json({ error: error });
-  }
-};
+//     await transporter.sendMail(mailOptions);
+//     res.status(200).json({ message: "Password sent to your mail" });
+//   } catch (error) {
+//     res.status(500).json({ error: error });
+//   }
+// };
 
 module.exports = {
   loginUser,
   signUpUser,
   logoutUser,
-  forgotPassword,
 };

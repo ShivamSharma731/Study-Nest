@@ -17,6 +17,7 @@ import News from "./components/News/News";
 import Solostudy from "./components/Solo Study/Solostudy";
 import ForgotPasswordPage from "./components/ForgotPasswordPage";
 import { ToastContainer, toast } from "react-toastify";
+import VerifyOtp from "./components/VerifyOtp";
 
 const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -40,6 +41,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
           {/* Routes that require Sidebar */}
           <Route
             path="/*"

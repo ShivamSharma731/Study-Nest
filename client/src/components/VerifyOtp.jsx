@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,29 +7,55 @@ import logoUrl from "./studyLogo.png";
 import Lottie from "lottie-react";
 import loadingAnimation from "./loading.json";
 
-const ForgotPassword = () => {
+const VerifyOtp = () => {
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes in seconds
   const navigate = useNavigate();
 
-  const handleForgotPassword = async (e) => {
+  useEffect(() => {
+    // Calculate the remaining time for the OTP
+    const interval = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 0) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? `0${secs}` : secs}`;
+  };
+
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4545/api/user/send-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "http://localhost:4545/api/user/verify-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, otp }),
+        }
+      );
 
       const data = await response.json();
       setLoading(false);
 
       if (response.ok) {
-        toast.success(data.message || "OTP sent successfully.", {
+        toast.success(data.message || "OTP verified successfully.", {
           position: "bottom-right",
           autoClose: 5000,
           hideProgressBar: true,
@@ -42,9 +68,9 @@ const ForgotPassword = () => {
           progressClassName: "bg-purple-700",
         });
 
-        navigate("/verify-otp");
+        navigate("/dashboard");
       } else {
-        toast.error(data.error || "Failed to send OTP.", {
+        toast.error(data.error || "Failed to verify OTP.", {
           position: "bottom-right",
           autoClose: 5000,
           hideProgressBar: true,
@@ -89,11 +115,11 @@ const ForgotPassword = () => {
         />
       </div>
 
-      {/* Forgot Password Box */}
+      {/* Verify OTP Box */}
       <div className="absolute w-[400px] bg-gray-800 mr-10 z-20 flex justify-center items-center p-10 rounded-xl shadow-lg top-1/2 transform -translate-y-1/2 right-[15%]">
         <div className="flex flex-col items-center gap-6 w-full">
           <h2 className="text-3xl text-purple-700 font-bold mb-4">
-            Forgot Password
+            Verify OTP
           </h2>
           <div className="flex flex-col gap-6 w-full">
             <div className="relative w-full">
@@ -106,12 +132,22 @@ const ForgotPassword = () => {
                 className="w-full bg-gray-700 border-none outline-none p-3 rounded-md text-white font-medium text-base"
               />
             </div>
+            <div className="relative w-full">
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter OTP"
+                required
+                className="w-full bg-gray-700 border-none outline-none p-3 rounded-md text-white font-medium text-base"
+              />
+            </div>
             <div className="relative w-full mb-2">
               <button
                 type="submit"
-                onClick={handleForgotPassword}
+                onClick={handleVerifyOtp}
                 className="relative w-full bg-purple-700 text-white font-semibold text-lg rounded-xl p-2 cursor-pointer hover:opacity-75"
-                disabled={loading}
+                disabled={loading || timeLeft <= 0}
               >
                 {loading ? (
                   <div className=" inset-0 flex items-center justify-center">
@@ -122,9 +158,13 @@ const ForgotPassword = () => {
                     />
                   </div>
                 ) : (
-                  "Send OTP"
+                  "Verify OTP"
                 )}
               </button>
+            </div>
+            <div className=" text-white flex flex-row gap-2 justify-center mt-4">
+              <p className="text-purple-500">Otp expires in :</p>{" "}
+              {formatTime(timeLeft)}
             </div>
           </div>
         </div>
@@ -133,4 +173,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default VerifyOtp;

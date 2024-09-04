@@ -136,7 +136,7 @@ const Login = () => {
       {showAnimation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
           <Lottie
-            animationData={mainPageLoading }
+            animationData={mainPageLoading}
             loop={true}
             className="w-64 h-64"
           />

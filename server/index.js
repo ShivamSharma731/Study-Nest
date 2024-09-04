@@ -5,8 +5,10 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const Channel = require("./Models/ChannelModel.js");
 const nodemailer = require("nodemailer");
+const Channel = require("./Models/ChannelModel.js");
+const Users = require("./Models/UsersModel.js");
+const Otp = require("./Models/OtpModel.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -26,18 +28,35 @@ app.use(
   })
 );
 
-const userAuthRoutes = require("./Routes/userAuthRoutes");
-const { tokenVerify } = require("./Middlewares/tokenVerify");
-const Users = require("./Models/UsersModel.js");
-const OtpModel = require("./Models/OtpModel.jsx");
-
 app.use(express.json());
 app.use(cookieParser());
 
+// JWT Secret Key (Consider moving this to environment variables for security)
+const JWT_SECRET = "secretkeyforthisjwtiamwritingnotinenvfuckhackers";
+
+// Setup Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "shivamsharma72004@gmail.com",
+    pass: "rdpk runx csnn yhjf", // Move this to environment variables for security
+  },
+  secure: true,
+});
+
+// Generate OTP function
+const generateOtp = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+};
+
+// Routes
+
+// Root route to check if the server is running
 app.get("/", (req, res) => {
   res.send("Server Running...");
 });
 
+// Route to search channels
 app.get("/searchChannels", async (req, res) => {
   const { query } = req.query;
 
@@ -51,16 +70,18 @@ app.get("/searchChannels", async (req, res) => {
   }
 });
 
+// Route to get users list
 app.get("/api/users", async (req, res) => {
   try {
     const users = await Users.find({}, "username");
     res.json(users);
-  } catch (er) {
-    console.error("Error fetching user list:", er);
+  } catch (error) {
+    console.error("Error fetching user list:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+// Route to get user ID and username based on JWT
 app.get("/api/user/userId", async (req, res) => {
   const token = req.cookies.jwt; // Assuming the JWT is stored in cookies
 
@@ -69,32 +90,18 @@ app.get("/api/user/userId", async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(
-      token,
-      "secretkeyforthisjwtiamwritingnotinenvfuckhackers"
-    );
+    const decoded = jwt.verify(token, JWT_SECRET);
     const userId = decoded._id;
     const user = await Users.findById(userId);
 
     // Return the username
     res.status(200).json({ userId, username: user.username });
-  } catch (err) {
+  } catch (error) {
     res.status(403).json({ message: "Invalid token" });
   }
 });
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "shivamsharma72004@gmail.com",
-    pass: "ShivamSharma@1970",
-  },
-});
-
-const generateOtp = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
-};
-
+// Route to send OTP
 app.post("/api/user/send-otp", async (req, res) => {
   const { email } = req.body;
 
@@ -102,9 +109,7 @@ app.post("/api/user/send-otp", async (req, res) => {
     return res.status(400).json({ error: "Email is required" });
   }
 
-  // generate nodemailer and otp and send a mail to this.mail
   const otp = generateOtp();
-  console.log(otp);
 
   const mailOptions = {
     from: "shivamsharma72004@gmail.com",
@@ -113,16 +118,89 @@ app.post("/api/user/send-otp", async (req, res) => {
     text: `Your OTP code is ${otp}. It is valid for 10 minutes.`,
   };
 
-  // send the otp
   try {
+    // Send the OTP via email
     await transporter.sendMail(mailOptions);
-    await OtpModel.create({ email, otp });
+
+    // Store the OTP in the database
+    await Otp.create({ email, otp });
+
     res.status(200).json({ message: "OTP sent successfully" });
-  } catch (err) {
-    console.log("Error sending otp : ", err);
+  } catch (error) {
+    console.log("Error sending OTP:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to send OTP" });
+    }
   }
 });
 
+// Route to verify OTP
+app.post("/api/user/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    return res.status(400).json({ error: "Email and OTP are required" });
+  }
+
+  try {
+    const otpRecord = await Otp.findOne({ email, otp });
+
+    if (!otpRecord) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    // If OTP is valid, delete it (optional)
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    res.status(200).json({ message: "OTP verified successfully" });
+  } catch (error) {
+    console.log("Error verifying OTP:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to verify OTP" });
+    }
+  }
+});
+
+// Route to handle forgot password request
+app.post("/api/user/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    const user = await Users.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User with this email does not exist" });
+    }
+
+    // Generate a token that expires in 10 minutes
+    const otp = generateOtp();
+    await transporter.sendMail({
+      from: "shivamsharma72004@gmail.com",
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Click on the following OTP to reset your password: ${otp}`,
+    });
+
+    // Store the OTP in the database
+    await Otp.create({ email, otp });
+
+    return res
+      .status(200)
+      .json({ message: "OTP sent to your email" });
+  } catch (error) {
+    console.error("Error in forgot-password route:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// User authentication routes
+const userAuthRoutes = require("./Routes/userAuthRoutes");
 app.use("/api/user", userAuthRoutes);
 
 // Socket.IO connection
@@ -193,8 +271,8 @@ io.on("connection", async (socket) => {
         );
         // Emit the new message to the channel so all users can see it
         io.to(channelId).emit("newMessage", newMessage);
-      } catch (err) {
-        console.log(err);
+      } catch (error) {
+        console.log("Error sending message:", error);
       }
     }
   );
@@ -204,10 +282,12 @@ io.on("connection", async (socket) => {
   });
 });
 
+// Start the server
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
+// Connect to MongoDB
 mongoose.connect(
   "mongodb+srv://shivamsharma731:ShivamSharma%402004@cluster0.vikhr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 );

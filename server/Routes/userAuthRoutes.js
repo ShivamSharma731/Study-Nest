@@ -3,7 +3,7 @@ const {
   loginUser,
   signUpUser,
   logoutUser,
-  forgotPassword,
+  
   getUserId,
 } = require("../Controllers/userAuthController");
 const tokenVerify = require("../Middlewares/tokenVerify");
@@ -22,6 +22,6 @@ router.get("/verify-token", tokenVerify, (req, res) => {});
 router.post("/logout", logoutUser);
 
 // forgot password
-router.post("/forgot-password", forgotPassword);
+// router.post("/forgot-password", forgotPassword);
 
 module.exports = router;
