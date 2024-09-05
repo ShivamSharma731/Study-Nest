@@ -9,6 +9,7 @@ import { CgNotes } from "react-icons/cg";
 import { FaRobot } from "react-icons/fa6";
 import { FaRegNewspaper } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
+import { BiSolidVideos } from "react-icons/bi";
 import { useAuthContext } from "../hooks/useAuthContext";
 import logoUrl from "./studyLogo.png";
 
@@ -52,6 +53,7 @@ const Sidebar = () => {
   const menus = [
     { name: "Dashboard", link: "/dashboard", icon: MdOutlineDashboard },
     { name: "Solo Study", link: "/solo-study", icon: IoBookSharp },
+    { name: "Study Rooms", link: "/study-room", icon: BiSolidVideos },
     { name: "Study Groups", link: "/channels", icon: PiChatsBold },
     { name: "Study Goals", link: "/study-goals", icon: GoGoal },
     { name: "Notes", link: "/notes", icon: CgNotes },

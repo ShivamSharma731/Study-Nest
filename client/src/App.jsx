@@ -18,6 +18,7 @@ import Solostudy from "./components/Solo Study/Solostudy";
 import ForgotPasswordPage from "./components/ForgotPasswordPage";
 import { ToastContainer, toast } from "react-toastify";
 import VerifyOtp from "./components/VerifyOtp";
+import StudyRooms from "./components/Study Rooms/StudyRooms";
 
 const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -57,6 +58,7 @@ const App = () => {
                   <Routes>
                     <Route path="/dashboard" element={<DashBoard />} />
                     <Route path="/solo-study" element={<Solostudy />} />
+                    <Route path="/study-room" element={<StudyRooms />} />
                     <Route path="/channels" element={<Channels />} />
                     <Route path="/notes" element={<Notes />} />
                     <Route path="/study-goals" element={<Studygoals />} />
