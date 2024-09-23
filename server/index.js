@@ -9,6 +9,7 @@ const nodemailer = require("nodemailer");
 const Channel = require("./Models/ChannelModel.js");
 const Users = require("./Models/UsersModel.js");
 const Otp = require("./Models/OtpModel.js");
+const axios = require("axios");
 
 const app = express();
 const server = http.createServer(app);
@@ -195,6 +196,7 @@ app.post("/api/user/forgot-password", async (req, res) => {
 });
 
 const userAuthRoutes = require("./Routes/userAuthRoutes");
+const Notebook = require("./Models/NotebooksModel.js");
 app.use("/api/user", userAuthRoutes);
 
 io.on("connection", async (socket) => {
@@ -260,10 +262,74 @@ io.on("connection", async (socket) => {
     }
   );
 
+  // Fetch notebooks on connection
+  socket.on("fetchNotebooks", async () => {
+    const token = socket.handshake.headers.cookie; // Assuming you pass the JWT via cookies
+    if (!token) return;
+
+    try {
+      const decoded = jwt.verify(token.split("=")[1], JWT_SECRET); // Extract the token
+      const notebooks = await Notebook.find({ userId: decoded._id });
+      socket.emit("notebookList", notebooks);
+    } catch (error) {
+      console.error("Error fetching notebooks:", error);
+    }
+  });
+
+  // Create notebook via socket
+  // Create notebook via socket
+  socket.on("createNotebook", async (notebookData) => {
+    const cookies = socket.handshake.headers.cookie;
+
+    if (!cookies) {
+      console.error("No cookies found");
+      return;
+    }
+
+    // Extract the token from the cookie
+    const tokenCookie = cookies
+      .split(";")
+      .find((c) => c.trim().startsWith("jwt="));
+    if (!tokenCookie) {
+      console.error("Token not found in cookies");
+      return;
+    }
+
+    const token = tokenCookie.split("=")[1]; // Get the token value
+
+    const { title } = notebookData; // Only use title
+    console.log("Received notebook data:", notebookData);
+
+    if (!title) {
+      console.error("Notebook title is required");
+      return;
+    }
+
+    try {
+      // Verify the JWT
+      const decoded = jwt.verify(token, JWT_SECRET);
+      console.log("Decoded JWT:", decoded);
+
+      const newNotebook = new Notebook({ title, userId: decoded._id });
+      await newNotebook.save();
+
+      // Fetch the updated notebook list
+      const notebooks = await Notebook.find({ userId: decoded._id });
+      console.log("Emitting updated notebooks:", notebooks);
+
+      // Emit the updated list of notebooks
+      io.emit("notebookList", notebooks);
+    } catch (error) {
+      console.error("Error creating notebook:", error.message); // Log error message
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log(`Client disconnected: ${socket.id}`);
   });
 });
+
+// Notebooks
 
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

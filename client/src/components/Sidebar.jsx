@@ -15,6 +15,7 @@ import logoUrl from "./studyLogo.png";
 
 const Sidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false); // New state for text delay
   const location = useLocation();
   const { dispatch } = useAuthContext();
   const navigate = useNavigate();
@@ -42,12 +43,13 @@ const Sidebar = () => {
   useEffect(() => {
     if (sidebarOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      // Delay for the text to appear after sidebar opens
+      const timeoutId = setTimeout(() => setContentVisible(true), 300);
+      return () => clearTimeout(timeoutId);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
+      setContentVisible(false);
     }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, [sidebarOpen]);
 
   const menus = [
@@ -70,11 +72,7 @@ const Sidebar = () => {
     >
       <div className="flex items-start justify-between py-3 mb-6">
         {sidebarOpen && (
-          <img
-            src={logoUrl}
-            alt="StudyNest Logo"
-            className="w-36 mt-4 h-auto"
-          />
+          <img src={logoUrl} alt="StudyNest Logo" className="w-36 mt-4 h-auto" />
         )}
         <HiMenuAlt3
           size={26}
@@ -97,7 +95,8 @@ const Sidebar = () => {
             <div className="text-purple-400">
               {React.createElement(menu.icon, { size: "20" })}
             </div>
-            {sidebarOpen && (
+            {/* Only show text if sidebar is open and delay has passed */}
+            {sidebarOpen && contentVisible && (
               <div
                 style={{ transitionDelay: `${i + 3}00ms` }}
                 className="text-sm font-bold whitespace-pre duration-500 translate-x-4"
@@ -105,6 +104,7 @@ const Sidebar = () => {
                 {menu.name}
               </div>
             )}
+            {/* Tooltip for closed sidebar */}
             {!sidebarOpen && (
               <span
                 className="absolute left-14 bg-gray-300 font-semibold text-gray-900 rounded-md drop-shadow-lg px-2 py-0.5 text-xs w-fit overflow-hidden group-hover:block hidden group-hover:left-14"
@@ -125,10 +125,10 @@ const Sidebar = () => {
           className={`flex items-center gap-2 pr-36 pl-2 pt-2 pb-2 rounded-md p-2 hover:bg-gray-800 group`}
         >
           <IoLogOut size={26} className="text-purple-500" />
-          {sidebarOpen && (
+          {sidebarOpen && contentVisible && (
             <div
               style={{ transitionDelay: `${menus.length + 3}00ms` }}
-              className="text-sm  whitespace-pre duration-500 translate-x-4 text-gray-400 font-extrabold"
+              className="text-sm whitespace-pre duration-500 translate-x-4 text-gray-400 font-extrabold"
             >
               Logout
             </div>

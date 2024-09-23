@@ -13,6 +13,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "axios": "^1.7.7",
     "framer-motion": "^11.3.31",
     "lottie-react": "^2.4.0",
     "lottie-web": "^5.12.2",
