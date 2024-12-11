@@ -6,8 +6,8 @@ const ChannelCreator = ({ socket, onClose }) => {
   const handleCreateChannel = () => {
     if (channelName) {
       socket.emit("createChannel", channelName);
-      setChannelName(""); // Clear the input after creating the channel
-      onClose(); // Close the creator UI after creating the channel
+      setChannelName(""); 
+      onClose(); 
     }
   };
 

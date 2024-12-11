@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import {
   MdOutlineKeyboardDoubleArrowLeft,
   MdOutlineKeyboardDoubleArrowRight,
 } from "react-icons/md";
+import { useLocation } from "react-router-dom";
+import { SlNotebook } from "react-icons/sl";
+import { IoSave } from "react-icons/io5";
 
 // Initialize socket outside the component to reuse the same connection
 const socket = io("http://localhost:4545", { withCredentials: true });
@@ -11,78 +14,160 @@ const socket = io("http://localhost:4545", { withCredentials: true });
 const Notes = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notebooks, setNotebooks] = useState([]);
+  const [selectedNotebook, setSelectedNotebook] = useState(null);
+  const [notesContent, setNotesContent] = useState("");
   const [newNotebookTitle, setNewNotebookTitle] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [notebookTitle, setNotebookTitle] = useState("My Notebooks");
+  const [prevNotebookTitle, setPrevNotebookTitle] = useState("");
+  const sidebarRef = useRef(null);
+  const toggleButtonRef = useRef(null);
+  const location = useLocation();
 
-  // Similar to the Channels example, we'll listen for notebooks on mount and when a notebook is added
   useEffect(() => {
     // Fetch notebooks on component mount
-    socket.emit("getNotebooks");
+    socket.emit("fetchNotebooks");
 
-    // Listen for 'notebookList' event to update notebooks
     socket.on("notebookList", (data) => {
       setNotebooks(data);
     });
 
-    // Also listen for any updates, such as when a new notebook is created
     socket.on("newNotebookAdded", (notebook) => {
       setNotebooks((prevNotebooks) => [...prevNotebooks, notebook]);
     });
 
-    // Clean up the socket listeners to prevent memory leaks
     return () => {
       socket.off("notebookList");
       socket.off("newNotebookAdded");
     };
-  }, []); // Empty dependency array ensures this only runs once on mount
+  }, [location.pathname]);
 
-  // Handle adding a new notebook
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        toggleButtonRef.current &&
+        !toggleButtonRef.current.contains(event.target)
+      ) {
+        setIsSidebarVisible(false);
+      }
+    };
+
+    if (isSidebarVisible) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSidebarVisible]);
+
+  const fetchNotebooks = () => {
+    socket.emit("fetchNotebooks");
+  };
+
   const handleAddNotebook = () => {
     if (newNotebookTitle.trim() === "") return;
 
     const newNotebook = { title: newNotebookTitle };
-    socket.emit("createNotebook", newNotebook); // Emit event to create a new notebook
-
+    socket.emit("createNotebook", newNotebook);
     setNewNotebookTitle("");
     setIsPopupOpen(false);
   };
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Toggle sidebar visibility
+  const handleNotebookClick = (notebook) => {
+    setPrevNotebookTitle(notebookTitle); // Store the current title before changing
+    setNotebookTitle(notebook.title); // Update the title to the selected notebook
+    setSelectedNotebook(notebook);
+    setIsSidebarVisible(false);
+
+    // Fetch notes data for the selected notebook
+    socket.emit("fetchNotes", notebook._id);
+
+    socket.on("notesData", (notes) => {
+      setNotesContent(notes.content || "");
+    });
+  };
+
+  const handleNotesChange = (e) => {
+    setNotesContent(e.target.value);
+  };
+
+  const saveNotes = () => {
+    if (selectedNotebook) {
+      const updatedNotes = {
+        notebookId: selectedNotebook._id,
+        content: notesContent,
+      };
+      socket.emit("saveNotes", updatedNotes);
+    }
+  };
+
   const toggleSidebar = () => {
-    setIsSidebarVisible(!isSidebarVisible);
+    setIsSidebarVisible((prev) => {
+      if (!prev) {
+        fetchNotebooks();
+      }
+      return !prev;
+    });
   };
 
   return (
     <div className="flex h-[98vh] p-4 bg-gray-950 text-white rounded-lg">
-      {/* Main Content Section */}
       <div className="flex-grow">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-purple-400 ml-3">
-            My Notebooks
+          <h1
+            className={`text-2xl font-bold text-purple-400 ml-3 transition-all duration-500`}
+          >
+            {notebookTitle}
           </h1>
           <button
-            className="bg-purple-800 text-sm hover:bg-purple-700 text-white font-semibold py-2 px-3 rounded-lg"
+            className="bg-purple-800 text-sm hover:bg-purple-700 text-white font-semibold py-2 px-3 mr-16 rounded-lg"
             onClick={() => setIsPopupOpen(true)}
           >
             Add Notebook
           </button>
         </div>
 
-        {/* Combined Right Div and Sidebar */}
         <div className="flex mt-4">
-          {/* Expandable Right Div */}
-          <div className={`flex-grow h-[90vh] bg-gray-800 rounded-lg p-4`}>
-            {/* Additional content can go here */}
+          <div className="flex-grow h-[90vh] bg-gray-800 rounded-lg p-1">
+            {selectedNotebook ? (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  {/* <button
+                    className="text-purple-600 font-semibold p-2 rounded-lg ml-auto"
+                    onClick={saveNotes}
+                  >
+                    <IoSave size={20} />
+                  </button> */}
+                </div>
+
+                <textarea
+                  className="w-full h-[80vh] bg-gray-800 text-white rounded-lg p-3 focus:outline-none"
+                  value={notesContent}
+                  onChange={handleNotesChange}
+                  placeholder="Start taking notes ....."
+                />
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-400 text-xl">
+                  Select a notebook to start writing notes...
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Notebook List Sidebar */}
           <div
+            ref={sidebarRef}
             className={`bg-gray-800 rounded-lg p-2 ${
               !isPopupOpen ? "ml-2 mr-2" : ""
             } flex flex-col transition-all duration-500 ease-in-out ${
@@ -101,7 +186,7 @@ const Notes = () => {
                     className="w-full p-2 pl-6 rounded-2xl text-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus:ring-indigo-500"
                   />
                 </div>
-                <ul className="mt-2 flex-grow overflow-y-auto">
+                <ul className="mt-2 flex-grow overflow-y-auto text-sm rounded-md bg-gray-800 p-3">
                   {notebooks
                     .filter((notebook) =>
                       notebook.title
@@ -111,8 +196,10 @@ const Notes = () => {
                     .map((notebook) => (
                       <li
                         key={notebook._id}
-                        className="bg-gray-700 p-2 rounded-lg mb-2 text-white"
+                        className="text-white py-2 p-2 flex items-center hover:bg-gray-700 hover:rounded-md cursor-pointer"
+                        onClick={() => handleNotebookClick(notebook)}
                       >
+                        <SlNotebook className="mr-6 text-purple-400 font-bold size-5" />
                         {notebook.title}
                       </li>
                     ))}
@@ -121,21 +208,20 @@ const Notes = () => {
             )}
           </div>
 
-          {/* Toggle Icon for Sidebar */}
           <div
+            ref={toggleButtonRef}
             className="flex items-center hover:bg-gray-900 p-2 rounded-lg cursor-pointer"
             onClick={toggleSidebar}
           >
             {isSidebarVisible ? (
-              <MdOutlineKeyboardDoubleArrowLeft className="cursor-pointer text-purple-400 text-xl" />
-            ) : (
               <MdOutlineKeyboardDoubleArrowRight className="cursor-pointer text-purple-400 text-xl" />
+            ) : (
+              <MdOutlineKeyboardDoubleArrowLeft className="cursor-pointer text-purple-400 text-xl" />
             )}
           </div>
         </div>
       </div>
 
-      {/* Popup for Adding Notebook */}
       {isPopupOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-gray-800 p-6 rounded-lg">

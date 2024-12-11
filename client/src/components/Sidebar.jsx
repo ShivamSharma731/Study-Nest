@@ -15,11 +15,41 @@ import logoUrl from "./studyLogo.png";
 
 const Sidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [contentVisible, setContentVisible] = useState(false); // New state for text delay
+  const [contentVisible, setContentVisible] = useState(false);
+  const [userDetails, setUserDetails] = useState({
+    username: "",
+    email: "",
+    userId: "",
+  });
   const location = useLocation();
-  const { dispatch } = useAuthContext();
+  const { dispatch, user } = useAuthContext();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch("http://localhost:4545/api/user/userId", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserDetails({
+          username: data.username,
+          email: data.email,
+          userId: data.userId,
+        });
+      } else {
+        console.log("Failed to fetch user data");
+      }
+    } catch (error) {
+      console.log("Error fetching user data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -43,7 +73,6 @@ const Sidebar = () => {
   useEffect(() => {
     if (sidebarOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      // Delay for the text to appear after sidebar opens
       const timeoutId = setTimeout(() => setContentVisible(true), 300);
       return () => clearTimeout(timeoutId);
     } else {
@@ -53,26 +82,34 @@ const Sidebar = () => {
   }, [sidebarOpen]);
 
   const menus = [
-    { name: "Dashboard", link: "/dashboard", icon: MdOutlineDashboard },
-    { name: "Solo Study", link: "/solo-study", icon: IoBookSharp },
+    { name: "DashBoard", link: "/dashboard", icon: MdOutlineDashboard },
     { name: "Study Rooms", link: "/study-room", icon: BiSolidVideos },
     { name: "Study Groups", link: "/channels", icon: PiChatsBold },
     { name: "Study Goals", link: "/study-goals", icon: GoGoal },
     { name: "Notes", link: "/notes", icon: CgNotes },
     { name: "Ask AI", link: "/ask-ai", icon: FaRobot },
-    { name: "News", link: "/news", icon: FaRegNewspaper },
+    { name: "Blogs", link: "/news", icon: FaRegNewspaper },
   ];
+
+  // Close sidebar on menu item click
+  const handleMenuItemClick = () => {
+    if (sidebarOpen) {
+      setSidebarOpen(false);
+    }
+  };
 
   return (
     <div
       ref={sidebarRef}
-      className={`bg-gray-900 min-h-screen text-purple-700 px-3 ${
+      className={`bg-gray-900 h-screen fixed top-0 left-0 text-purple-700 px-3 ${
         sidebarOpen ? "w-64" : "w-16"
-      } duration-500 flex flex-col`}
+      } duration-500 flex flex-col z-50`}
     >
       <div className="flex items-start justify-between py-3 mb-6">
         {sidebarOpen && (
-          <img src={logoUrl} alt="StudyNest Logo" className="w-36 mt-4 h-auto" />
+          <div className="flex flex-col mt-3 pl-2 text-left">
+            <span></span>
+          </div>
         )}
         <HiMenuAlt3
           size={26}
@@ -91,11 +128,11 @@ const Sidebar = () => {
                 ? "bg-gray-700 text-white"
                 : "text-gray-400"
             }`}
+            onClick={handleMenuItemClick} // Close sidebar on item click
           >
             <div className="text-purple-400">
               {React.createElement(menu.icon, { size: "20" })}
             </div>
-            {/* Only show text if sidebar is open and delay has passed */}
             {sidebarOpen && contentVisible && (
               <div
                 style={{ transitionDelay: `${i + 3}00ms` }}
@@ -104,7 +141,6 @@ const Sidebar = () => {
                 {menu.name}
               </div>
             )}
-            {/* Tooltip for closed sidebar */}
             {!sidebarOpen && (
               <span
                 className="absolute left-14 bg-gray-300 font-semibold text-gray-900 rounded-md drop-shadow-lg px-2 py-0.5 text-xs w-fit overflow-hidden group-hover:block hidden group-hover:left-14"
@@ -122,7 +158,7 @@ const Sidebar = () => {
       <div className="mt-auto py-3 px-0 pb-6">
         <button
           onClick={handleLogout}
-          className={`flex items-center gap-2 pr-36 pl-2 pt-2 pb-2 rounded-md p-2 hover:bg-gray-800 group`}
+          className="flex items-center gap-2 pr-36 pl-2 pt-2 pb-2 rounded-md p-2  group"
         >
           <IoLogOut size={26} className="text-purple-500" />
           {sidebarOpen && contentVisible && (

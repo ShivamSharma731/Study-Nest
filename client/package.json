@@ -14,9 +14,11 @@
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "axios": "^1.7.7",
+    "cloudinary": "^2.5.1",
     "framer-motion": "^11.3.31",
     "lottie-react": "^2.4.0",
     "lottie-web": "^5.12.2",
+    "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-custom-scrollbar": "^1.0.0",
     "react-dom": "^18.3.1",
@@ -25,7 +27,8 @@
     "react-router-dom": "^6.26.1",
     "react-toastify": "^10.0.5",
     "simplebar": "^6.2.7",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.7.5",
+    "tailwind-scrollbar": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

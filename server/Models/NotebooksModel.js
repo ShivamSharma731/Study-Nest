@@ -7,12 +7,12 @@ const notebookSchema = new mongoose.Schema(
       required: true,
     },
     content: {
-      type: String, // Or an array for multiple notes
+      type: String, 
       default: "",
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Users", // Reference to the Users model
+      ref: "Users",
       required: true,
     },
   },

@@ -16,9 +16,11 @@ import Askai from "./components/Ask Ai/Askai";
 import News from "./components/News/News";
 import Solostudy from "./components/Solo Study/Solostudy";
 import ForgotPasswordPage from "./components/ForgotPasswordPage";
-import { ToastContainer, toast } from "react-toastify";
 import VerifyOtp from "./components/VerifyOtp";
 import StudyRooms from "./components/Study Rooms/StudyRooms";
+import { ToastContainer } from "react-toastify";
+import "./App.css";
+
 
 const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -47,14 +49,14 @@ const App = () => {
           <Route
             path="/*"
             element={
-              <div className="flex">
+              <div className="flex scrollbar scrollbar-thumb-gray-600 scrollbar-track-gray-900">
                 <Sidebar
                   sidebarOpen={sidebarOpen}
                   showText={showText}
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
                 />
-                <div className="flex-1 p-0 bg-gray-950 ml-[0px]">
+                <div className="flex-1 pl-16 py-0 p-0 bg-gray-950 ml-[0px]">
                   <Routes>
                     <Route path="/dashboard" element={<DashBoard />} />
                     <Route path="/solo-study" element={<Solostudy />} />

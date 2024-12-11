@@ -51,6 +51,51 @@ app.get("/", (req, res) => {
   res.send("Server Running...");
 });
 
+// Cloudinary
+
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+
+// Cloudinary Configuration
+cloudinary.config({
+  cloud_name: "doya45cek", // Replace with your cloud name
+  api_key: "575356892585428", // Replace with your API key
+  api_secret: "kYnuxqOWYFgUWIqerg303tTm8iM", // Replace with your API secret
+});
+
+// Multer Storage configuration
+const storage = multer.memoryStorage(); // Store file in memory
+const upload = multer({ storage: storage });
+
+app.post("/api/user/upload-image", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  try {
+    // Upload image to Cloudinary
+    const result = await cloudinary.uploader.upload_stream(
+      {
+        resource_type: "auto", // Let Cloudinary detect the file type
+      },
+      (error, result) => {
+        if (error) {
+          return res.status(500).json({ error: "Failed to upload image" });
+        }
+
+        // Send back the image URL
+        res.status(200).json({ imageUrl: result.secure_url });
+      }
+    );
+
+    // Send the image to Cloudinary
+    result.end(req.file.buffer);
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.get("/searchChannels", async (req, res) => {
   const { query } = req.query;
 

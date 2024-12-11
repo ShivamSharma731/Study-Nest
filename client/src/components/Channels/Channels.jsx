@@ -5,7 +5,7 @@ import Lottie from "react-lottie";
 import io from "socket.io-client";
 import { logo } from "../../assets/images.js";
 import { useLocation } from "react-router-dom";
-import messageAnimation from "./messageAnimation.json"; 
+import messageAnimation from "./messageAnimation.json";
 import ChannelCreator from "./ChannelCreator.jsx";
 
 const socket = io("http://localhost:4545");
@@ -15,7 +15,7 @@ const Channels = () => {
   const [hasChats, setHasChats] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [showChatContainer, setShowChatContainer] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); 
+  const [searchQuery, setSearchQuery] = useState("");
   const [showChannelCreator, setShowChannelCreator] = useState(false);
   const location = useLocation();
 
@@ -24,7 +24,7 @@ const Channels = () => {
       socket.emit("getChannels");
     };
 
-    fetchChannels(); 
+    fetchChannels();
 
     socket.on("channelList", (channels) => {
       setChannelList(channels);
@@ -48,7 +48,7 @@ const Channels = () => {
   };
 
   const handleCreateChannelClick = () => {
-    setShowChannelCreator(true); 
+    setShowChannelCreator(true);
   };
 
   const handleSelectChannel = (channel) => {
@@ -79,18 +79,18 @@ const Channels = () => {
   };
 
   const handleCloseChannelCreator = () => {
-    setShowChannelCreator(false); 
+    setShowChannelCreator(false);
   };
 
   return (
     <div className="p-3 h-full mr-1">
-      <div className="flex space-x-1 h-full">
+      <div className="flex space-x-1 h-full ">
         <div className="flex-none w-1/5 bg-gray-800 p-4 ml-0 rounded-lg shadow-lg flex flex-col justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-purple-400 mb-8 mt-4">
+            <h2 className="text-2xl font-semibold text-purple-500 mb-8 mt-2">
               Study Groups
             </h2>
-
+    
+          <div>
             <div className="mb-4">
               <input
                 type="text"

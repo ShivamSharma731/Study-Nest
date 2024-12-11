@@ -41,3 +41,22 @@
 .read-the-docs {
   color: #888;
 } */
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  /* background-color: #4a4a4a; Darker color */
+  background-color: #5f388a; 
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #2c2c2c; /* Dark track color */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #6a6a6a; /* Lighter on hover */
+}
